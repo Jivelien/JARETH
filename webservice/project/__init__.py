@@ -31,11 +31,12 @@ class TestForm(FlaskForm):
 @app.route("/")
 def hello_world():
     forms = TestForm()
+    last_cigarette = Event.query.order_by(Event.eventtime.desc()).first().eventtime
     if forms.validate_on_submit():
         return 'From Date is : {} To Date is : {}'.format(forms.startdate.data, forms.todate.data)
     import os
     print(f"you are here : {os.getcwd()}")
-    return render_template('test.html',form=forms)
+    return render_template('test.html',form=forms, last_cigarette=last_cigarette)
 
 
 @app.route("/add_event", methods=['POST', 'GET'])
