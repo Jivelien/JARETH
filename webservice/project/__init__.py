@@ -1,11 +1,11 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-
+import os
 from flask import render_template
 from flask_wtf import FlaskForm
 from datetime import date
-from wtforms.fields.html5 import DateField
+from wtforms.fields.html5 import DateField, TimeField, SearchField
 from wtforms.fields.html5 import TimeField
 
 app = Flask(__name__, template_folder="/home/app/web/project")
@@ -25,6 +25,7 @@ class Event(db.Model):
         self.eventtime = eventtime
 
 class TestForm(FlaskForm):
+    password = SearchField('Password:')
     eventdate = DateField('Date:')
     eventtime = TimeField('time:')
 
@@ -42,6 +43,8 @@ def hello_world():
 @app.route("/add_event", methods=['POST', 'GET'])
 def add_event():
     if request.method == 'POST':
+        if request.form.get("password") != os.getenv('TMP_PASS'):
+            return "Nope, motherfucker"
         eventdate = request.form.get("eventdate")
         eventtime = request.form.get("eventtime")
         eventdatetime = eventdate+'T'+eventtime
