@@ -1,7 +1,7 @@
 <html>
 <body>
-<h1> Flask WFForm </h1>
-Last cigarette : {{last_cigarette}}
+<h1> Cigarette tracking </h1>
+<h3>Last cigarette : {{last_cigarette}}</h3>
 
 <form method="POST" action="{{url_for('.add_event')}}">
  {{ form.csrf_token }}
