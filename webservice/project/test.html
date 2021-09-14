@@ -1,0 +1,17 @@
+<html>
+<body>
+<h1> Cigarette tracking </h1>
+<h3>Last cigarette : {{last_cigarette}}</h3>
+
+<form method="POST" action="{{url_for('.add_event')}}">
+ {{ form.csrf_token }}
+ {{ form.password.label }}
+    {{ form.password }} <br/> <br/>
+ {{ form.eventdate.label }}
+    {{ form.eventdate }}
+{{ form.eventtime.label }}
+   {{ form.eventtime }}
+<input type="submit" value="Submit">
+</form>
+</body>
+</html>

@@ -1,0 +1,27 @@
+version: '3.5'
+
+services:
+  database:
+    build: ./database
+    environment:
+      PGDATA: /data/postgres
+    volumes:
+       - jareth_database:/data/postgres
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./.env.db.dev
+  
+  webservice:
+    build: ./webservice
+    command: python manage.py run -h 0.0.0.0
+    volumes:
+      - ./webservice/:/usr/src/app/
+    ports:
+      - 5000:5000
+    env_file:
+      - ./.env.ws.dev
+    depends_on:
+      - database
+volumes:
+  jareth_database:
