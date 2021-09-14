@@ -1,0 +1,13 @@
+<html>
+<body>
+<h1> Flask WFForm </h1>
+<form method="POST" action="{{url_for('.add_event')}}">
+ {{ form.csrf_token }}
+ {{ form.eventdate.label }}
+    {{ form.eventdate }}
+{{ form.eventtime.label }}
+   {{ form.eventtime }}
+<input type="submit" value="Submit">
+</form>
+</body>
+</html>
