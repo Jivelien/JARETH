@@ -24,21 +24,6 @@ class Event(db.Model):
         self.label = "cigarette"
         self.eventtime = eventtime
 
-class TestForm(FlaskForm):
-    password = SearchField('Password:')
-    eventdate = DateField('Date:')
-    eventtime = TimeField('time:')
-
-@app.route("/")
-def hello_world():
-    forms = TestForm()
-    last_cigarette = Event.query.order_by(Event.eventtime.desc()).first().eventtime
-    if forms.validate_on_submit():
-        return 'From Date is : {} To Date is : {}'.format(forms.startdate.data, forms.todate.data)
-    import os
-    print(f"you are here : {os.getcwd()}")
-    return render_template('test.html',form=forms, last_cigarette=last_cigarette)
-
 @app.route("/get_last_cigarette", methods=['GET'])
 def last_cigarette():
     return jsonify(event=Event.query.order_by(Event.eventtime.desc()).first().eventtime)
@@ -58,4 +43,4 @@ def add_event():
     event = Event(eventdatetime)
     db.session.add(event)
     db.session.commit()
-    return jsonify(added=event.eventtime)
+    return jsonify(event=event.eventtime)
