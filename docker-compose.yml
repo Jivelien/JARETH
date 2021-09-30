@@ -14,14 +14,27 @@ services:
   
   webservice:
     build: ./webservice
-    command: python manage.py run -h 0.0.0.0
+    command: python manage.py run -h 0.0.0.0 
     volumes:
       - ./webservice/:/usr/src/app/
     ports:
-      - 5000:5000
+      - 42001:5000
     env_file:
       - ./.env.ws.dev
     depends_on:
       - database
+      
+  front:
+    build: ./front
+    command: flask run -h 0.0.0.0 
+    volumes:
+      - ./front/:/usr/src/app/
+    ports:
+      - 42002:5000
+    env_file:
+      - ./.env.front.dev
+    depends_on:
+      - webservice
+          
 volumes:
   jareth_database:
