@@ -27,7 +27,7 @@
 <script> 
    var date = new Date();
    var currentDate = date.toISOString().substring(0,10);
-   var currentTime = date.getHours() + ":" + (date.getMinutes()<10?'0':'') + date.getMinutes();
+   var currentTime = (date.getHours()<10?'0':'') + date.getHours()+ ":" + (date.getMinutes()<10?'0':'') + date.getMinutes();
 
    document.getElementById('eventdate').value = currentDate;
    document.getElementById('eventtime').value = currentTime;
