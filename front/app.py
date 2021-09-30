@@ -3,9 +3,7 @@ from flask import render_template
 from flask_wtf import FlaskForm
 from flask import render_template
 from flask_wtf import FlaskForm
-from datetime import date
-from wtforms.fields.html5 import DateField, TimeField, SearchField
-from wtforms.fields.html5 import TimeField
+from datetime import datetime
 import requests
 
 app = Flask(__name__)
@@ -15,18 +13,17 @@ def get_last_cigarette():
     last_cigarette=requests.get("http://webservice:5000/get_last_cigarette").json()
     return last_cigarette
 
-class TestForm(FlaskForm):
-    password = SearchField('Password:')
-    eventdate = DateField('Date:')
-    eventtime = TimeField('time:')
-
-
 @app.route("/")
 def main():
-    forms = TestForm()
-    last_cigarette = get_last_cigarette()
+    last_cigarette = get_last_cigarette().get("event")
+    if last_cigarette :
+        last_cigarette_timestamp = datetime.strptime(last_cigarette, "%a, %d %b %Y %X GMT")
+    else:
+        last_cigarette_timestamp = ''
+        last_cig_from_now = ''
 
-    return render_template('test.html',form=forms, last_cigarette=last_cigarette)
+    return render_template('test.html',
+                            last_cigarette=last_cigarette_timestamp)
 
 @app.route("/add_event", methods=['POST'])
 def add_event():
