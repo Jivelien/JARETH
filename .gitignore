@@ -131,3 +131,4 @@ dmypy.json
 .pyre/
 .env.db.dev
 .env.ws.dev
+.env.front.dev
