@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, redirect
 from flask import render_template
 from flask_wtf import FlaskForm
 from flask import render_template
@@ -38,7 +38,7 @@ def add_event():
 
     add_cigarette = requests.post("http://webservice:5000/add_event", data=event)
 
-    return main()    
+    return redirect('/')    
 
 
 
