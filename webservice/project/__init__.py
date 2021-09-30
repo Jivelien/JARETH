@@ -39,6 +39,10 @@ def hello_world():
     print(f"you are here : {os.getcwd()}")
     return render_template('test.html',form=forms, last_cigarette=last_cigarette)
 
+@app.route("/get_last_cigarette", methods=['GET'])
+def last_cigarette():
+    return jsonify(event=Event.query.order_by(Event.eventtime.desc()).first().eventtime)
+    
 
 @app.route("/add_event", methods=['POST', 'GET'])
 def add_event():
