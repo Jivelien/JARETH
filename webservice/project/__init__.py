@@ -2,11 +2,6 @@ from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
-from flask import render_template
-from flask_wtf import FlaskForm
-from datetime import date
-from wtforms.fields.html5 import DateField, TimeField, SearchField
-from wtforms.fields.html5 import TimeField
 
 app = Flask(__name__, template_folder="/home/app/web/project")
 app.config.from_object("project.config.Config")
@@ -29,18 +24,15 @@ def last_cigarette():
     return jsonify(event=Event.query.order_by(Event.eventtime.desc()).first().eventtime)
     
 
-@app.route("/add_event", methods=['POST', 'GET'])
+@app.route("/add_event", methods=['POST'])
 def add_event():
-    if request.method == 'POST':
-        if request.form.get("password") != os.getenv('TMP_PASS'):
-            return "Nope, motherfucker"
-        eventdate = request.form.get("eventdate")
-        eventtime = request.form.get("eventtime")
-        eventdatetime = eventdate+'T'+eventtime
-    else:
-        eventdatetime = request.args.get('t')
+    if request.form.get("password") != os.getenv('TMP_PASS'):
+        return "Nope, motherfucker"
+
+    eventdatetime = request.form.get("eventdatetime")
 
     event = Event(eventdatetime)
     db.session.add(event)
     db.session.commit()
+    
     return jsonify(event=event.eventtime)

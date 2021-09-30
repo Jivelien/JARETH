@@ -33,8 +33,9 @@ def add_event():
     password = request.form.get("password") 
     eventdate = request.form.get("eventdate")
     eventtime = request.form.get("eventtime")
+    eventdatetime = eventdate+'T'+eventtime
 
-    event = {'password' : password, 'eventdate' : eventdate, 'eventtime' : eventtime}
+    event = {'password' : password, 'eventdatetime' : eventdatetime}
 
     add_cigarette = requests.post("http://webservice:5000/add_event", data=event)
 
