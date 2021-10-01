@@ -1,17 +1,35 @@
-<html>
-<body>
-<h1> Cigarette tracking </h1>
-<h3>Last cigarette : {{last_cigarette}}</h3>
+{% extends 'base.html' %}
+{% block content %}
 
-<form method="POST" action="{{url_for('.add_event')}}">
- {{ form.csrf_token }}
- {{ form.password.label }}
-    {{ form.password }} <br/> <br/>
- {{ form.eventdate.label }}
-    {{ form.eventdate }}
-{{ form.eventtime.label }}
-   {{ form.eventtime }}
-<input type="submit" value="Submit">
-</form>
-</body>
-</html>
+<div class="container">
+   <br/>
+   <h3>Last cigarette : </h3>
+   <h4>{{last_cigarette}}</h4>
+   <br/><br/>
+   <form method="POST" action="{{url_for('.add_event')}}">
+      <div class="mb-3">
+         <label for="password" class="form-label">Password:</label>
+         <input class="form-control" id="password" name="password" type="search" value=""> 
+      </div>
+      <div class="mb-3">
+         <label for="eventdate" class="form-label">Date:</label>
+         <input class="form-control" id="eventdate" name="eventdate" type="date">
+      </div>
+      <div class="mb-3">
+         <label for="eventtime" class="form-label">time:</label>
+         <input class="form-control" id="eventtime" name="eventtime" type="time">
+      </div>
+      <div class="mb-3">
+         <input type="submit" value="Submit">
+      </div>
+   </form>
+</div>
+<script> 
+   var date = new Date();
+   var currentDate = date.toISOString().substring(0,10);
+   var currentTime = (date.getHours()<10?'0':'') + date.getHours()+ ":" + (date.getMinutes()<10?'0':'') + date.getMinutes();
+
+   document.getElementById('eventdate').value = currentDate;
+   document.getElementById('eventtime').value = currentTime;
+</script>
+{% endblock %}
