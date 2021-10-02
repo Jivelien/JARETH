@@ -4,3 +4,4 @@ Flask-SQLAlchemy==2.5.1
 psycopg2-binary==2.8.6
 WTForms==2.3.3
 flask-wtf==0.15.1
+python-dateutil
