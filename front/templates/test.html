@@ -3,9 +3,11 @@
 
 <div class="container">
    <br/>
-   <h3>Last cigarette : </h3>
-   <h4>{{last_cigarette}}</h4>
-   <br/><br/>
+   {% if last_cigarette %}
+   <h4>Last cigarette was {{last_cigarette}}</h4>
+   <h5>{{ advice }}</h5>
+   {% endif %}
+   <br/>
    <form method="POST" action="{{url_for('.add_event')}}">
       <div class="mb-3">
          <label for="password" class="form-label">Password:</label>
