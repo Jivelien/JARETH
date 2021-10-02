@@ -4,6 +4,7 @@ services:
   database:
     build: ./database
     environment:
+      TZ: Europe/Paris
       PGDATA: /data/postgres
     volumes:
        - jareth_database:/data/postgres
@@ -14,6 +15,8 @@ services:
   
   webservice:
     build: ./webservice
+    environment:
+      TZ: Europe/Paris
     command: python manage.py run -h 0.0.0.0 
     volumes:
       - ./webservice/:/usr/src/app/
@@ -26,6 +29,8 @@ services:
       
   front:
     build: ./front
+    environment:
+      TZ: Europe/Paris
     command: flask run -h 0.0.0.0 
     volumes:
       - ./front/:/usr/src/app/

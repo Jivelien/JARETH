@@ -25,12 +25,10 @@ def last_cigarette():
     # datetime.strptime("Thu, 30 Sep 2021 20:53:00 GMT", "%a, %d %b %Y %X GMT")
     last = Event.query.order_by(Event.eventtime.desc()).first()
     if last:
-        return jsonify(event=last.eventtime)
+        return jsonify(id= last.id, event=str(last.eventtime))
     else:
-        return jsonify(event='')
-
-    
-
+        return jsonify(id= '', event='')
+ 
 @app.route("/add_event", methods=['POST'])
 def add_event():
     if request.form.get("password") != os.getenv('TMP_PASS'):
@@ -43,4 +41,4 @@ def add_event():
     db.session.add(event)
     db.session.commit()
     
-    return jsonify(event=event.eventtime)
+    return jsonify(id=event.id, event=event.eventtime)
