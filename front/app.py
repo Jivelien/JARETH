@@ -1,8 +1,4 @@
-from flask import Flask, jsonify, request, redirect
-from flask import render_template
-from flask_wtf import FlaskForm
-from flask import render_template
-from flask_wtf import FlaskForm
+from flask import Flask, jsonify, request, redirect, render_template
 from datetime import datetime
 from dateutil.parser import parse
 import requests
@@ -10,9 +6,9 @@ import requests
 app = Flask(__name__)
 app.config.from_object("config.Config")
 
-__SECONDS_PER_WEEK__ = 7*60*60*24
-__SECONDS_PER_DAY__ = 60*60*24
-__SECONDS_PER_HOUR__ = 60*60
+__SECONDS_PER_WEEK__   = 7*60*60*24
+__SECONDS_PER_DAY__    = 60*60*24
+__SECONDS_PER_HOUR__   = 60*60
 __SECONDS_PER_MINUTE__ = 60
 
 def get_last_cigarette():
