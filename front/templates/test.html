@@ -8,6 +8,20 @@
    <h5>{{ advice }}</h5>
    {% endif %}
    <br/>
+   {% if error %}
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+         <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+         <strong>ERROR: </strong> {{ error }}
+         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+       </div>
+   {% endif %}
+   {% if record %}
+   <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
+      <strong>Cigarette added successfully: </strong> {{ record }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+   {% endif %}
    <form method="POST" action="{{url_for('.add_event')}}">
       <div class="mb-3">
          <label for="password" class="form-label">Password:</label>
@@ -28,7 +42,7 @@
 </div>
 <script> 
    var date = new Date();
-   var currentDate = date.getFullYear() + '-' + (date.getMonth()<10?'0':'') + date.getMonth() + '-' + (date.getDate()<10?'0':'') + date.getDate();
+   var currentDate = date.getFullYear() + '-' + ((date.getMonth() + 1) <10?'0':'') + ( date.getMonth() + 1 )  + '-' + (date.getDate()<10?'0':'') + date.getDate();
    var currentTime = (date.getHours()<10?'0':'') + date.getHours()+ ":" + (date.getMinutes()<10?'0':'') + date.getMinutes();
 
    document.getElementById('eventdate').value = currentDate;

@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, redirect, render_template
+from flask import Flask, jsonify, request, redirect, render_template, url_for
 from datetime import datetime
 from dateutil.parser import parse
 import requests
@@ -77,8 +77,11 @@ def main():
                             last_cigarette=last_cigarette,
                             advice= advice)
 
-@app.route("/add_event", methods=['POST'])
+@app.route("/add_event", methods=['POST', 'GET'])
 def add_event():
+    if request.method == 'GET':
+        return redirect(url_for('main'))
+
     password = request.form.get("password") 
     eventdate = request.form.get("eventdate")
     eventtime = request.form.get("eventtime")
@@ -86,9 +89,27 @@ def add_event():
 
     event = {'password' : password, 'eventdatetime' : eventdatetime}
 
-    add_cigarette = requests.post("http://webservice:5000/add_event", data=event)
+    add_cigarette_call = requests.post("http://webservice:5000/add_event", data=event)
 
-    return redirect('/')    
+    last_cigarette_timestamp = get_last_cigarette().get("event")
+    if last_cigarette_timestamp != '':
+        delta = (datetime.now() - parse(last_cigarette_timestamp)).total_seconds()
+        last_cigarette = duration_to_string(delta)
+        advice = get_advice(delta)
+    else:
+        last_cigarette = ''
+        advice = ''
+
+    if add_cigarette_call.status_code != 200:
+        return  render_template('test.html',
+                            last_cigarette=last_cigarette,
+                            advice= advice,
+                            error='Unable to record cigarette')
+    else:
+        return  render_template('test.html',
+                            last_cigarette=last_cigarette,
+                            advice= advice,
+                            record= add_cigarette_call.json().get('event'))  
 
 
 

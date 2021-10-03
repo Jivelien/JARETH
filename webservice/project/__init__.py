@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
@@ -28,17 +28,17 @@ def last_cigarette():
         return jsonify(id= last.id, event=str(last.eventtime))
     else:
         return jsonify(id= '', event='')
- 
+
+
 @app.route("/add_event", methods=['POST'])
 def add_event():
     if request.form.get("password") != os.getenv('TMP_PASS'):
-        return "Nope, motherfucker"
+        return Response("Unable to record due to bad authentication", status= 400) 
 
     eventdatetime = request.form.get("eventdatetime")
-
     event = Event(eventdatetime)
 
     db.session.add(event)
     db.session.commit()
     
-    return jsonify(id=event.id, event=event.eventtime)
+    return jsonify(id=event.id, event=str(event.eventtime))
