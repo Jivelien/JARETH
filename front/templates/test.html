@@ -8,20 +8,15 @@
    <h5>{{ advice }}</h5>
    {% endif %}
    <br/>
-   {% if error %}
-      <div class="alert alert-danger alert-dismissible fade show" role="alert">
-         <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
-         <strong>ERROR: </strong> {{ error }}
+
+   {% for category, message in  get_flashed_messages(with_categories=true) %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+         <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="{{ category | title }}:"><use xlink:href="#{{ category }}_icon"/></svg>
+         {{ message }}
          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
        </div>
-   {% endif %}
-   {% if record %}
-   <div class="alert alert-success alert-dismissible fade show" role="alert">
-      <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
-      <strong>Cigarette added successfully: </strong> {{ record }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-   {% endif %}
+   {% endfor %}
+
    <form method="POST" action="{{url_for('.add_event')}}">
       <div class="mb-3">
          <label for="password" class="form-label">Password:</label>

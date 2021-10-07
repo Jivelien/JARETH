@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, redirect, render_template, url_for
+from flask import Flask, jsonify, request, redirect, render_template, url_for, flash
 from datetime import datetime
 from dateutil.parser import parse
 import requests
@@ -64,32 +64,22 @@ def get_advice(duration):
 
 @app.route("/")
 def main():
-    last_cigarette_timestamp = get_last_cigarette().get("event")
-    if last_cigarette_timestamp != '':
-        delta = (datetime.now() - parse(last_cigarette_timestamp)).total_seconds()
-        last_cigarette = duration_to_string(delta)
-        advice = get_advice(delta)
-    else:
-        last_cigarette = ''
-        advice = ''
-
-    return render_template('test.html',
-                            last_cigarette=last_cigarette,
-                            advice= advice)
+    return redirect(url_for('add_event'))
 
 @app.route("/add_event", methods=['POST', 'GET'])
 def add_event():
-    if request.method == 'GET':
-        return redirect(url_for('main'))
+    if request.method == 'POST':
+        password = request.form.get("password") 
+        eventdate = request.form.get("eventdate")
+        eventtime = request.form.get("eventtime")
+        eventdatetime = eventdate+'T'+eventtime
+        event = {'password' : password, 'eventdatetime' : eventdatetime}
+        add_cigarette_call = requests.post("http://webservice:5000/add_event", data=event)
 
-    password = request.form.get("password") 
-    eventdate = request.form.get("eventdate")
-    eventtime = request.form.get("eventtime")
-    eventdatetime = eventdate+'T'+eventtime
-
-    event = {'password' : password, 'eventdatetime' : eventdatetime}
-
-    add_cigarette_call = requests.post("http://webservice:5000/add_event", data=event)
+        if add_cigarette_call.status_code != 200:
+            flash('ERROR : Unable to record cigarette', 'danger')
+        else:
+            flash(f" Cigarette added successfully: {add_cigarette_call.json().get('event')}", 'success')
 
     last_cigarette_timestamp = get_last_cigarette().get("event")
     if last_cigarette_timestamp != '':
@@ -100,16 +90,9 @@ def add_event():
         last_cigarette = ''
         advice = ''
 
-    if add_cigarette_call.status_code != 200:
-        return  render_template('test.html',
+    return  render_template('test.html',
                             last_cigarette=last_cigarette,
-                            advice= advice,
-                            error='Unable to record cigarette')
-    else:
-        return  render_template('test.html',
-                            last_cigarette=last_cigarette,
-                            advice= advice,
-                            record= add_cigarette_call.json().get('event'))  
+                            advice= advice)
 
 
 
