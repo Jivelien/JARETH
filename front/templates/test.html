@@ -12,7 +12,7 @@
    {% for category, message in  get_flashed_messages(with_categories=true) %}
       <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
          <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="{{ category | title }}:"><use xlink:href="#{{ category }}_icon"/></svg>
-         {{ message }}
+         {{ message | safe }}
          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
        </div>
    {% endfor %}

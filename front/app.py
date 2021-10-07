@@ -77,9 +77,9 @@ def add_event():
         add_cigarette_call = requests.post("http://webservice:5000/add_event", data=event)
 
         if add_cigarette_call.status_code != 200:
-            flash('ERROR : Unable to record cigarette', 'danger')
+            flash('<strong>ERROR</strong> - Unable to record cigarette', 'danger')
         else:
-            flash(f" Cigarette added successfully: {add_cigarette_call.json().get('event')}", 'success')
+            flash(f"<strong>Cigarette added successfully</strong> - {add_cigarette_call.json().get('event')}", 'success')
 
     last_cigarette_timestamp = get_last_cigarette().get("event")
     if last_cigarette_timestamp != '':
