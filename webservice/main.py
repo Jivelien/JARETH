@@ -45,7 +45,6 @@ def get_all_users():
 
 
 @app.route("/user", methods=['POST'],endpoint='create_user')
-@token_requiered
 def create_user():
     data = request.get_json()
     if not data['username'] or not data['mail'] or not data['password']: #FIXME 
