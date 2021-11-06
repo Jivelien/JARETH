@@ -148,7 +148,7 @@ def login():
             payload = {
                 'public_id': result[1],
                 'username': result[0],
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=10)
+                #'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=10)
             }
             token = jwt.encode(payload, app.config['SECRET_KEY'])
             conn.close()
@@ -158,6 +158,55 @@ def login():
         else:
             conn.close()
             return Response(status=401)
+    else:
+        conn.close()
+        return Response(status=404)
+
+@app.route("/cigarette", methods=['POST'], endpoint='create_cigarette')
+@token_requiered
+def create_cigarette(current_user):
+    data = request.get_json()
+    if not data['event_time']:
+        return Response(status=400)
+
+    #FIXME check if unique
+    #FIXME convert event_time to datetime
+
+    engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+    conn = engine.connect()
+    conn.execute(f"INSERT INTO smoked_cigarettes(public_user_id, event_time) VALUES('{current_user}', '{data['event_time']}')")
+    conn.close()
+
+    return Response(status=200)
+
+@app.route("/cigarettes", methods=['GET'], endpoint='get_cigarettes')
+@token_requiered
+def get_cigarettes(current_user):
+    engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+    conn = engine.connect()
+    results = conn.execute(f"SELECT cigarette_id, event_time FROM smoked_cigarettes WHERE public_user_id='{current_user}'").fetchall()
+
+    cigarettes = []
+    for cigarette in results:
+        cigarettes.append({
+            'id' : cigarette[0],
+            'event_time': cigarette[1]
+        })
+
+    conn.close()
+    return jsonify(cigarettes)
+
+@app.route("/cigarette/<cigarette_id>", methods=['DELETE'], endpoint='delete_cigarette')
+@token_requiered
+def delete_cigarette(current_user, cigarette_id):
+    engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+    conn = engine.connect()
+    result = conn.execute(f"SELECT 1 FROM smoked_cigarettes WHERE cigarette_id='{cigarette_id}' and public_user_id='{current_user}'").fetchone()
+
+    if result:
+        conn.execute(f"DELETE FROM smoked_cigarettes WHERE cigarette_id='{cigarette_id}' and public_user_id='{current_user}'")
+        conn.close()
+        return Response(status=200)
     else:
         conn.close()
         return Response(status=404)
