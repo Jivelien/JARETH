@@ -2,6 +2,8 @@ from flask import Flask, jsonify, request, Response
 from sqlalchemy import create_engine
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
+import datetime
 
 app = Flask(__name__)
 app.config.from_object("config.Config")
@@ -105,3 +107,31 @@ def delete_user(public_id):
         conn.close()
         return Response(status=404)
     
+@app.route("/login", methods=['POST'])
+def login():
+    data = request.get_json()
+    if not data['mail'] or not data['password']:
+        return Response(status=400)
+
+    engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+    conn = engine.connect()
+    result = conn.execute(f"SELECT username, public_id, mail, password FROM users WHERE mail='{data['mail']}'").fetchone()
+
+    if result:
+        if check_password_hash(result[3], data['password']):
+            payload = {
+                'public_id': result[1],
+                'username': result[0] #,
+                # 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+            }
+            token = jwt.encode(payload, app.config['SECRET_KEY'])
+            conn.close()
+            return jsonify(public_id=result[1],
+                           token=token
+                           )
+        else:
+            conn.close()
+            return Response(status=401)
+    else:
+        conn.close()
+        return Response(status=404)
