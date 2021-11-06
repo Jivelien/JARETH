@@ -121,8 +121,8 @@ def login():
         if check_password_hash(result[3], data['password']):
             payload = {
                 'public_id': result[1],
-                'username': result[0] #,
-                # 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+                'username': result[0],
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
             }
             token = jwt.encode(payload, app.config['SECRET_KEY'])
             conn.close()
@@ -135,3 +135,9 @@ def login():
     else:
         conn.close()
         return Response(status=404)
+
+@app.route("/token")
+def decode_auth_token():
+    token = request.args['token']
+    payload = jwt.decode(jwt=token, key=app.config['SECRET_KEY'], algorithms=['HS256'])
+    return jsonify(payload)
