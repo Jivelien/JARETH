@@ -17,7 +17,7 @@ services:
     build: ./webservice
     environment:
       TZ: Europe/Paris
-    command: python manage.py run -h 0.0.0.0 
+    command: flask run -h 0.0.0.0 
     volumes:
       - ./webservice/:/usr/src/app/
     ports:
@@ -27,19 +27,19 @@ services:
     depends_on:
       - database
       
-  front:
-    build: ./front
-    environment:
-      TZ: Europe/Paris
-    command: flask run -h 0.0.0.0 
-    volumes:
-      - ./front/:/usr/src/app/
-    ports:
-      - 42002:5000
-    env_file:
-      - ./.env.front.dev
-    depends_on:
-      - webservice
+#  front:
+#    build: ./front
+#    environment:
+#      TZ: Europe/Paris
+#    command: flask run -h 0.0.0.0 
+#    volumes:
+#      - ./front/:/usr/src/app/
+#    ports:
+#      - 42002:5000
+#    env_file:
+#      - ./.env.front.dev
+#    depends_on:
+#      - webservice
           
 volumes:
   jareth_database:
