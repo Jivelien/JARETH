@@ -1,6 +1,6 @@
 CREATE TABLE objectives (
     objective_id                            INT GENERATED ALWAYS AS IDENTITY,
-    public_user_id                          INT UNIQUE NOT NULL,
+    public_user_id                          VARCHAR(36) UNIQUE NOT NULL,
     cigarette_per_day                       INT,
     delay_between_cigarette_in_minutes      INT,
     PRIMARY KEY(objective_id),

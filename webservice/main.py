@@ -20,13 +20,13 @@ def token_requiered(f):
             data = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
         except:
             return Response("Token is invalid", 401)
-        return f(*args, **kwargs)
+        return f(current_user = data['public_id'], *args, **kwargs)
 
     return wrapper
 
 @app.route("/users", methods=['GET'],endpoint='get_all_users')
 @token_requiered
-def get_all_users():
+def get_all_users(current_user):
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
     conn = engine.connect()
     results = conn.execute("SELECT username, public_id, mail, password FROM users").fetchall()
@@ -34,10 +34,11 @@ def get_all_users():
     users = []
     for user in results:
         users.append({
+            'is_current_user' : current_user == user[1],
             'username': user[0],
             'public_id': user[1],
             'mail': user[2],
-            'password': user[3]
+            #'password': user[3]
         })
 
     conn.close()
@@ -67,7 +68,7 @@ def create_user():
 
 @app.route("/user/<public_id>", methods=['GET'],endpoint='get_user')
 @token_requiered
-def get_user(public_id):
+def get_user(current_user, public_id):
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
     conn = engine.connect()
     result = conn.execute(f"SELECT username, public_id, mail, password FROM users WHERE public_id='{public_id}'").fetchone()
@@ -88,7 +89,10 @@ def get_user(public_id):
 
 @app.route("/user/<public_id>", methods=['PUT'],endpoint='update_user')
 @token_requiered
-def update_user(public_id):
+def update_user(current_user, public_id):
+    if not current_user == public_id:
+        return Response(status=401)
+
     data = request.get_json()
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
     conn = engine.connect()
@@ -113,7 +117,10 @@ def update_user(public_id):
 
 @app.route("/user/<public_id>", methods=['DELETE'],endpoint='delete_user')
 @token_requiered
-def delete_user(public_id):
+def delete_user(current_user, public_id):
+    if not current_user == public_id:
+        return Response(status=401)
+
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
     conn = engine.connect()
     result = conn.execute(f"SELECT 1 FROM users WHERE public_id='{public_id}'").fetchone()
