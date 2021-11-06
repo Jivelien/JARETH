@@ -9,7 +9,23 @@ app = Flask(__name__)
 app.config.from_object("config.Config")
 
 
-@app.route("/users", methods=['GET'])
+def token_requiered(f):
+    def wrapper(*args, **kwargs):
+        token = None
+        if request.args.get("token"):
+            token = request.args.get("token")
+        if not token:
+            return Response("Token is invalid", 401)
+        try:
+            data = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
+        except:
+            return Response("Token is invalid", 401)
+        return f(*args, **kwargs)
+
+    return wrapper
+
+@app.route("/users", methods=['GET'],endpoint='get_all_users')
+@token_requiered
 def get_all_users():
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
     conn = engine.connect()
@@ -28,7 +44,8 @@ def get_all_users():
     return jsonify(users)
 
 
-@app.route("/user", methods=['POST'])
+@app.route("/user", methods=['POST'],endpoint='create_user')
+@token_requiered
 def create_user():
     data = request.get_json()
     if not data['username'] or not data['mail'] or not data['password']: #FIXME 
@@ -49,7 +66,8 @@ def create_user():
                     password = hashed_password)
 
 
-@app.route("/user/<public_id>", methods=['GET'])
+@app.route("/user/<public_id>", methods=['GET'],endpoint='get_user')
+@token_requiered
 def get_user(public_id):
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
     conn = engine.connect()
@@ -69,7 +87,8 @@ def get_user(public_id):
         return Response(status=404)
 
 
-@app.route("/user/<public_id>", methods=['PUT'])
+@app.route("/user/<public_id>", methods=['PUT'],endpoint='update_user')
+@token_requiered
 def update_user(public_id):
     data = request.get_json()
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
@@ -93,7 +112,8 @@ def update_user(public_id):
         return Response(status=404)
 
 
-@app.route("/user/<public_id>", methods=['DELETE'])
+@app.route("/user/<public_id>", methods=['DELETE'],endpoint='delete_user')
+@token_requiered
 def delete_user(public_id):
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
     conn = engine.connect()
@@ -107,7 +127,7 @@ def delete_user(public_id):
         conn.close()
         return Response(status=404)
     
-@app.route("/login", methods=['POST'])
+@app.route("/login", methods=['POST'], endpoint='login')
 def login():
     data = request.get_json()
     if not data['mail'] or not data['password']:
@@ -122,7 +142,7 @@ def login():
             payload = {
                 'public_id': result[1],
                 'username': result[0],
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=10)
             }
             token = jwt.encode(payload, app.config['SECRET_KEY'])
             conn.close()
@@ -135,9 +155,3 @@ def login():
     else:
         conn.close()
         return Response(status=404)
-
-@app.route("/token")
-def decode_auth_token():
-    token = request.args['token']
-    payload = jwt.decode(jwt=token, key=app.config['SECRET_KEY'], algorithms=['HS256'])
-    return jsonify(payload)
