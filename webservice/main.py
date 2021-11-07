@@ -48,8 +48,11 @@ def get_all_users(current_user):
 @app.route("/user", methods=['POST'],endpoint='create_user')
 def create_user():
     data = request.get_json()
-    if not data['username'] or not data['mail'] or not data['password']: #FIXME 
+
+    if not data.get('username') or not data.get('mail') or not data.get('password'):
         return Response(status=400)
+
+
         #TODO check unicity of username and mail
 
     data['public_id'] = str(uuid.uuid4())
@@ -99,7 +102,7 @@ def update_user(current_user, public_id):
     result = conn.execute(f"SELECT username, public_id, mail, password FROM users WHERE public_id='{public_id}'").fetchone()
 
     if result:
-        if data['username'] and data['mail'] and data['password']: #FIXME
+        if data.get('username') and data.get('mail') and data.get('password'): #FIXME
             hashed_password = generate_password_hash(data['password'], method='sha256')
             conn.execute(f"UPDATE users SET username='{data['username']}', mail='{data['mail']}', password='{hashed_password}' WHERE public_id='{public_id}'")
             conn.close()
@@ -136,7 +139,7 @@ def delete_user(current_user, public_id):
 @app.route("/login", methods=['POST'], endpoint='login')
 def login():
     data = request.get_json()
-    if not data['mail'] or not data['password']:
+    if not data.get('mail') or not data.get('password'):
         return Response(status=400)
 
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
@@ -166,7 +169,7 @@ def login():
 @token_requiered
 def create_cigarette(current_user):
     data = request.get_json()
-    if not data['event_time']:
+    if not data.get('event_time'):
         return Response(status=400)
 
     #FIXME check if unique
@@ -179,6 +182,7 @@ def create_cigarette(current_user):
 
     return Response(status=200)
 
+
 @app.route("/cigarettes", methods=['GET'], endpoint='get_cigarettes')
 @token_requiered
 def get_cigarettes(current_user):
@@ -190,7 +194,7 @@ def get_cigarettes(current_user):
     for cigarette in results:
         cigarettes.append({
             'id' : cigarette[0],
-            'event_time': cigarette[1]
+            'event_time': cigarette[1].strftime('%Y-%m-%d %H:%M:%S') 
         })
 
     conn.close()
@@ -205,6 +209,26 @@ def delete_cigarette(current_user, cigarette_id):
 
     if result:
         conn.execute(f"DELETE FROM smoked_cigarettes WHERE cigarette_id='{cigarette_id}' and public_user_id='{current_user}'")
+        conn.close()
+        return Response(status=200)
+    else:
+        conn.close()
+        return Response(status=404)
+
+
+@app.route("/cigarette/<cigarette_id>", methods=['PUT'], endpoint='update_cigarette')
+@token_requiered
+def update_cigarette(current_user, cigarette_id):
+    data = request.get_json()
+    if not data.get('event_time'):
+        return Response(status=400)
+
+    engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+    conn = engine.connect()
+    result = conn.execute(f"SELECT 1 FROM smoked_cigarettes WHERE cigarette_id='{cigarette_id}' and public_user_id='{current_user}'").fetchone()
+
+    if result:
+        conn.execute(f"UPDATE smoked_cigarettes SET event_time='{data['event_time']}' WHERE cigarette_id='{cigarette_id}' and public_user_id='{current_user}'")
         conn.close()
         return Response(status=200)
     else:
