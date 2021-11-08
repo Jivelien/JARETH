@@ -5,10 +5,24 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 import datetime
 from time import sleep
+from dateutil.parser import parse
 
 app = Flask(__name__)
 app.config.from_object("config.Config")
 
+def is_date(string):
+    try: 
+        parse(string)
+        return True
+    except ValueError:
+        return False
+
+def is_integer(string):
+    try:
+        int(string)
+        return True
+    except ValueError:
+        return False
 
 def token_requiered(f):
     def wrapper(*args, **kwargs):
@@ -218,11 +232,10 @@ def create_cigarette(current_user):
     if not data and not data.get('event_time'):
         return Response(status=400)
 
-    try:
-        event_time = datetime.datetime.strptime(
-            data.get('event_time'), "%Y-%m-%d %H:%M:%S")
-    except ValueError:
+    if not is_date(data.get('event_time')):
         return Response(status=400)
+
+    event_time = parse(data.get('event_time'))
 
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
     with engine.connect() as conn:
@@ -252,13 +265,30 @@ def create_cigarette(current_user):
 def get_cigarettes(current_user):
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
     with engine.connect() as conn:
-        query_parameters = (current_user,)
+        query_parameters = [current_user]
         query = '''
                 SELECT cigarette_id, event_time 
                 FROM smoked_cigarettes 
                 WHERE public_user_id=%s
                 '''
-        results = conn.execute(query, query_parameters)
+
+        if request.args.get('start_time') and is_date(request.args.get('start_time')):
+            start_time = parse(data.get('start_time'))
+            query_parameters.append(start_time)
+            query += ' AND event_time >= %s'
+
+        if request.args.get('end_time') and is_date(request.args.get('end_time')):
+            end_time = parse(data.get('end_time'))
+            query_parameters.append(end_time)
+            query += ' AND event_time <= %s'
+
+        query += ' ORDER BY event_time DESC'
+
+        if request.args.get('limit') and is_integer(request.args.get('limit')):
+            query_parameters.append(request.args.get('limit'))
+            query += ' LIMIT %s'
+            
+        results = conn.execute(query, tuple(query_parameters))
 
     cigarettes = []
     for cigarette in results:
