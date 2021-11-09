@@ -7,6 +7,7 @@ import datetime
 from time import sleep
 from dateutil.parser import parse
 
+
 app = Flask(__name__)
 app.config.from_object("config.Config")
 
@@ -25,19 +26,33 @@ def is_integer(string : str) -> bool:
         return False
 
 def token_required(f):
-    #TODO block token if link to no user
     def wrapper(*args, **kwargs):
-        token = None
-        if request.args.get("token"):
-            token = request.args.get("token")
-        if not token:
-            return Response("Token is invalid", 401)
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            token = auth_header.split(" ")[1]
+            if not token:
+                return Response("Token is invalid", 401)
         try:
             data = jwt.decode(
                 token, app.config["SECRET_KEY"], algorithms=["HS256"])
         except:
             return Response("Token is invalid", 401)
-        return f(current_user=data['public_id'], *args, **kwargs)
+
+        current_user = data.get("public_id","nothing")
+
+        engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+        with engine.connect() as conn:
+            query_parameters = (current_user,)
+            query = '''
+                    SELECT 1
+                    FROM users 
+                    WHERE public_id=%s
+                    '''
+            result = conn.execute(query, query_parameters).fetchone()
+        if not result:
+            return Response("Token is invalid", 401)
+
+        return f(current_user=current_user, *args, **kwargs)
     return wrapper
 
 
@@ -52,7 +67,7 @@ def get_all_users(current_user):
     users = []
     for user in results:
         users.append({
-            'is_current_user': current_user == user['username'],
+            'is_current_user': current_user == user['public_id'],
             'username': user['username'],
             'public_id': user['public_id'],
             'mail': user['mail'],
