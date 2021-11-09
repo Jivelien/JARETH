@@ -8,8 +8,8 @@ app.config.from_object("config.Config")
 
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
 
-#WEBSERVICE_URL = "http://webservice:5000"
-WEBSERVICE_URL = "http://localhost:42001"
+WEBSERVICE_URL = "http://webservice:5000"
+
 class RegistrationForm(Form):
     username = StringField('Username', [
         validators.Length(min=4, max=25),
@@ -33,6 +33,15 @@ class LoginForm(Form):
     password = PasswordField('Password', [
         validators.DataRequired()
     ])
+
+def ws_call_create_user(username, mail, password):
+    data = {
+        "username": username,
+        "mail": mail,
+        "password": password
+    }
+    call = requests.post(f"{WEBSERVICE_URL}/user", json=data)
+    return call
 
 def ws_call_login(mail, password):
     user = {
@@ -71,9 +80,9 @@ def login():
         call = ws_call_login(form.mail.data, form.password.data)
         if call.status_code == 200:
             token = call.json().get('token')
+            flash("Welcome to the jungle", "success")
             response = make_response(render_template('index.html'))
             response.set_cookie('token', token)
-            flash("Welcome to the jungle", "success")
             return response
         else:
             if call.json():
@@ -86,7 +95,10 @@ def login():
 
 @app.route("/logout")
 def logout():
-    return render_template("index.html")
+    flash("Thanks bye bitch", 'success')
+    response = make_response(render_template('index.html'))
+    response.delete_cookie('token')
+    return response
 
 
 @app.route("/record_cigarette")
