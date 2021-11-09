@@ -196,7 +196,7 @@ def delete_user(current_user, public_id):
 def login():
     data = request.get_json()
     if not data.get('mail') or not data.get('password'):
-        return Response(status=400)
+        return make_response(jsonify(message="Missing information in payload"), 400)
 
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
 
@@ -208,7 +208,7 @@ def login():
         result = conn.execute(query, query_parameters).fetchone()
 
     if not result:
-        return Response(status=404)
+        return make_response(jsonify(message="Unknown user"), 404)
 
     if check_password_hash(result[3], data['password']):
         payload = {
@@ -221,8 +221,8 @@ def login():
                        token=token
                        )
     else:
-        sleep(seconds=5)
-        return Response(status=401)
+        sleep(5)
+        return make_response(jsonify(message="Wrong password"), 401)
 
 
 @app.route("/cigarette", methods=['POST'], endpoint='create_cigarette')

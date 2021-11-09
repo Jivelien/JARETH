@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, redirect, render_template, url_for, flash
+from flask import Flask, make_response, jsonify, request, redirect, render_template, url_for, flash
 from datetime import datetime
 from dateutil.parser import parse
 import requests
@@ -76,7 +76,11 @@ def login():
             flash("Welcome to the jungle", "success")
             return response
         else:
-            flash(call.json().get('message', 'Login failed: Something append ¯\_(ツ)_/¯'), 'danger')
+            if call.json():
+                message = call.json().get('message', 'Login failed: Something append ¯\_(ツ)_/¯')
+            else:
+                message = 'Login failed: Something append ¯\_(ツ)_/¯'  
+            flash(message, 'danger')
     
     return render_template('login.html', form=form)
 
