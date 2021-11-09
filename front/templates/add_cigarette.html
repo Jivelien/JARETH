@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container">
+   <br/>
+   {% if last_cigarette %}
+   <h4>Last cigarette was {{last_cigarette}}</h4>
+   <h5>{{ advice }}</h5>
+   {% endif %}
+   <br/>
+
+   {% for category, message in  get_flashed_messages(with_categories=true) %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+         <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="{{ category | title }}:"><use xlink:href="#{{ category }}_icon"/></svg>
+         {{ message | safe }}
+         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+       </div>
+   {% endfor %}
+
+   <form method="POST" action="{{url_for('.add_event')}}">
+      <div class="mb-3">
+         <label for="password" class="form-label">Password:</label>
+         <input class="form-control" id="password" name="password" type="search" value=""> 
+      </div>
+      <div class="mb-3">
+         <label for="eventdate" class="form-label">Date:</label>
+         <input class="form-control" id="eventdate" name="eventdate" type="date">
+      </div>
+      <div class="mb-3">
+         <label for="eventtime" class="form-label">time:</label>
+         <input class="form-control" id="eventtime" name="eventtime" type="time">
+      </div>
+      <div class="mb-3">
+         <input type="submit" value="Submit">
+      </div>
+   </form>
+</div>
+<script> 
+   var date = new Date();
+   var currentDate = date.getFullYear() + '-' + ((date.getMonth() + 1) <10?'0':'') + ( date.getMonth() + 1 )  + '-' + (date.getDate()<10?'0':'') + date.getDate();
+   var currentTime = (date.getHours()<10?'0':'') + date.getHours()+ ":" + (date.getMinutes()<10?'0':'') + date.getMinutes();
+
+   document.getElementById('eventdate').value = currentDate;
+   document.getElementById('eventtime').value = currentTime;
+</script>
+{% endblock %}

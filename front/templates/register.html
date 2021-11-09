@@ -1,0 +1,17 @@
+{% from "macro.html" import render_field %}
+
+{% extends 'base.html' %}
+{% block content %}
+<br/>
+<h1 class="text-center">Registration </h1>
+<br/>
+<form method="POST" action="{{url_for('.register')}}" >
+    {{ render_field(form.username) }}
+    {{ render_field(form.email) }}
+    {{ render_field(form.password) }}
+    {{ render_field(form.confirm) }}
+    <br/>
+  <button class="btn btn-primary" type=submit value=Register>Register</button>
+</form>
+
+{% endblock %}

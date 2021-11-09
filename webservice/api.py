@@ -10,21 +10,21 @@ from dateutil.parser import parse
 app = Flask(__name__)
 app.config.from_object("config.Config")
 
-def is_date(string):
+def is_date(string : str) -> bool:
     try: 
         parse(string)
         return True
     except ValueError:
         return False
 
-def is_integer(string):
+def is_integer(string : str) -> bool:
     try:
         int(string)
         return True
     except ValueError:
         return False
 
-def token_requiered(f):
+def token_required(f):
     def wrapper(*args, **kwargs):
         token = None
         if request.args.get("token"):
@@ -37,12 +37,11 @@ def token_requiered(f):
         except:
             return Response("Token is invalid", 401)
         return f(current_user=data['public_id'], *args, **kwargs)
-
     return wrapper
 
 
 @app.route("/users", methods=['GET'], endpoint='get_all_users')
-@token_requiered
+@token_required
 def get_all_users(current_user):
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
     with engine.connect() as conn:
@@ -99,7 +98,7 @@ def create_user():
 
 
 @app.route("/user/<public_id>", methods=['GET'], endpoint='get_user')
-@token_requiered
+@token_required
 def get_user(current_user, public_id):
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
     with engine.connect() as conn:
@@ -124,7 +123,7 @@ def get_user(current_user, public_id):
 
 
 @app.route("/user/<public_id>", methods=['PUT'], endpoint='update_user')
-@token_requiered
+@token_required
 def update_user(current_user, public_id):
     if not current_user == public_id:
         return make_response(jsonify(message="Permission denied to update this user"), 403)
@@ -140,31 +139,31 @@ def update_user(current_user, public_id):
                 '''
         result = conn.execute(query, query_parameters).fetchone()
 
-    if result:
-        data = request.get_json()
-        if data and data.get('username') and data.get('mail') and data.get('password'):
-            hashed_password = generate_password_hash(data['password'], method='sha256')
-            with engine.begin() as conn:
-                query_parameters = (data['username'], data['mail'], hashed_password, public_id)
-                query = '''
-                        UPDATE users 
-                        SET username=%s, mail=%s, password=%s
-                        WHERE public_id=%s
-                        '''
-                conn.execute(query, query_parameters)
-
-            return jsonify(username=data['username'],
-                           public_id=public_id,
-                           mail=data['mail'],
-                           password=hashed_password)
-        else:
-            return make_response(jsonify(message="Missing informations in payload"), 400)
-    else:
+    if not result:
+        return make_response(jsonify(message="Missing informations in payload"), 400)
+    
+    data = request.get_json()
+    if not data or not data.get('username') or not data.get('mail') or not data.get('password'):
         return make_response(jsonify(message="No user to update"), 404)
+
+    hashed_password = generate_password_hash(data['password'], method='sha256')
+    with engine.begin() as conn:
+        query_parameters = (data['username'], data['mail'], hashed_password, public_id)
+        query = '''
+                UPDATE users 
+                SET username=%s, mail=%s, password=%s
+                WHERE public_id=%s
+                '''
+        conn.execute(query, query_parameters)
+
+    return jsonify(username=data['username'],
+                    public_id=public_id,
+                    mail=data['mail'],
+                    password=hashed_password)
 
 
 @app.route("/user/<public_id>", methods=['DELETE'], endpoint='delete_user')
-@token_requiered
+@token_required
 def delete_user(current_user, public_id):
     if not current_user == public_id:
         return make_response(jsonify(message="Permission denied to delete this user"), 401)
@@ -226,7 +225,7 @@ def login():
 
 
 @app.route("/cigarette", methods=['POST'], endpoint='create_cigarette')
-@token_requiered
+@token_required
 def create_cigarette(current_user):
     data = request.get_json()
     if not data and not data.get('event_time'):
@@ -261,7 +260,7 @@ def create_cigarette(current_user):
 
 
 @app.route("/cigarettes", methods=['GET'], endpoint='get_cigarettes')
-@token_requiered
+@token_required
 def get_cigarettes(current_user):
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
     with engine.connect() as conn:
@@ -300,7 +299,7 @@ def get_cigarettes(current_user):
 
 
 @app.route("/cigarette/<cigarette_id>", methods=['DELETE'], endpoint='delete_cigarette')
-@token_requiered
+@token_required
 def delete_cigarette(current_user, cigarette_id):
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
 
