@@ -6,13 +6,11 @@
 
 <br/>
 
-<form method="POST" action="{{url_for('.register')}}" >
-    {{ render_field(form.username) }}
+<form method="POST" action="{{url_for('.login')}}" >
     {{ render_field(form.mail) }}
     {{ render_field(form.password) }}
-    {{ render_field(form.confirm) }}
     <br/>
-  <button class="btn btn-primary" type=submit value=Register>Register</button>
+  <button class="btn btn-primary" type=submit value=Register>Login</button>
 </form>
 
 {% endblock %}

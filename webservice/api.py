@@ -25,6 +25,7 @@ def is_integer(string : str) -> bool:
         return False
 
 def token_required(f):
+    #TODO block token if link to no user
     def wrapper(*args, **kwargs):
         token = None
         if request.args.get("token"):

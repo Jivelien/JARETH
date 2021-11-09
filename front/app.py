@@ -5,18 +5,17 @@ import requests
 
 app = Flask(__name__)
 app.config.from_object("config.Config")
-app.config['ENV'] = 'development'
-app.config['DEBUG'] = True
-app.config['TESTING'] = True
 
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
 
+#WEBSERVICE_URL = "http://webservice:5000"
+WEBSERVICE_URL = "http://localhost:42001"
 class RegistrationForm(Form):
     username = StringField('Username', [
         validators.Length(min=4, max=25),
         validators.InputRequired()
         ])
-    email = StringField('Email Address', [
+    mail = StringField('Email Address', [
         validators.Email(),
         validators.Length(min=6, max=35),
         validators.InputRequired()
@@ -27,6 +26,21 @@ class RegistrationForm(Form):
     ])
     confirm = PasswordField('Repeat Password')
 
+class LoginForm(Form):
+    mail = StringField('Email Address', [
+        validators.InputRequired()
+        ])
+    password = PasswordField('Password', [
+        validators.DataRequired()
+    ])
+
+def ws_call_login(mail, password):
+    user = {
+        "mail": mail,
+        "password": password
+    }
+    call = requests.post(f"{WEBSERVICE_URL}/login", json=user)
+    return call
 
 @app.route("/")
 def main():
@@ -36,15 +50,35 @@ def main():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     form = RegistrationForm(request.form)
+
     if request.method == 'POST' and form.validate():
-        flash('Thanks for registering')
-        return redirect(url_for('login'))
+        call = ws_call_create_user(form.username.data, form.mail.data, form.password.data)
+        if call.status_code == 201:
+            flash('You are now registered and can log in', 'success')
+            return redirect(url_for('login'))
+            
+        else:
+            flash(call.json().get('message', 'Registration failed: Something append ¯\_(ツ)_/¯'), 'danger')
+
     return render_template('register.html', form=form)
 
 
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    return render_template("index.html")
+    form = LoginForm(request.form)
+
+    if request.method == 'POST' and form.validate():
+        call = ws_call_login(form.mail.data, form.password.data)
+        if call.status_code == 200:
+            token = call.json().get('token')
+            response = make_response(render_template('index.html'))
+            response.set_cookie('token', token)
+            flash("Welcome to the jungle", "success")
+            return response
+        else:
+            flash(call.json().get('message', 'Login failed: Something append ¯\_(ツ)_/¯'), 'danger')
+    
+    return render_template('login.html', form=form)
 
 @app.route("/logout")
 def logout():
