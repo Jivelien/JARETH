@@ -55,6 +55,29 @@ def token_required(f):
         return f(current_user=current_user, *args, **kwargs)
     return wrapper
 
+@app.route("/whoami", methods=["GET"], endpoint="whoami")
+@token_required
+def whoami(current_user):
+    engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+    with engine.connect() as conn:
+        query_parameters = (current_user,)
+        query = '''
+                SELECT username, public_id, mail, password 
+                FROM users 
+                WHERE public_id=%s
+                '''
+        result = conn.execute(query, query_parameters).fetchone()
+
+    if result:
+        user = {
+            'username': result[0],
+            'public_id': result[1],
+            'mail': result[2],
+            'password': result[3]
+        }
+        return jsonify(user)
+    else:
+        return make_response(jsonify(message='Unable to find user'), 404)
 
 @app.route("/users", methods=['GET'], endpoint='get_all_users')
 @token_required

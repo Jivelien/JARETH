@@ -19,25 +19,30 @@
         </button>
           <div class="collapse navbar-collapse" id="navbarContent">
               <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                {% if current_user %}
                   <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="{{ url_for('record_cigarette') }}">Record</a>
                   </li>
                   <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="{{ url_for('dashboard') }}">Dashboard</a>
                   </li>
+                {% endif %}
               </ul>
               <ul class="navbar-nav">
                   <li class="nav-item">
                     <ul class="navbar-nav " aria-labelledby="navbarContent">
+                      {% if current_user %}
                       <li>
                         <a class="nav-link active" aria-current="page" href="{{ url_for('logout') }}">Logout</a>
                       </li>
+                      {% else %}
                       <li>
                         <a class="nav-link active" aria-current="page" href="{{ url_for('login') }}">Login</a>
                       </li>
                       <li>
                         <a class="nav-link active" aria-current="page" href="{{ url_for('register') }}">Register</a>
                       </li>
+                      {% endif %}
                     </ul>
                   </li>
               </ul>
@@ -69,6 +74,10 @@
   </div>
   
   <div class="container">
+  {% if current_user %}
+     <h1>Hello {{ current_user.username }}</h1> 
+  {% endif %}
+  
   {% block content %}
   {% endblock %}
   </div>
