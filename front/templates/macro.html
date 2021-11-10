@@ -2,7 +2,7 @@
 
 {% if field.errors %}
     <div class="mb-3 ">
-        {{ field.label(class="form-label text-danger") }}
+        {{ field.label(class="form-label") }}
         {{ field(class="form-control", **kwargs)|safe }}
     <div class="form-text text-danger">
     {% for error in field.errors %}
