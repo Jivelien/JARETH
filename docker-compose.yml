@@ -17,7 +17,7 @@ services:
     build: ./webservice
     environment:
       TZ: Europe/Paris
-    command: python manage.py run -h 0.0.0.0 
+    command: flask run -h 0.0.0.0 
     volumes:
       - ./webservice/:/usr/src/app/
     ports:

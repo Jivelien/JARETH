@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% from "macro.html" import render_field %}
+{% block content %}
+
+   <H1 class="text-center">Record a cigarette</H1>
+   <br/>
+   {% if last_cigarette %}
+   <h4>Last cigarette was {{last_cigarette}}</h4>
+   <h5>{{ advice }}</h5>
+   {% endif %}
+   <br/>
+
+   <form action="{{ url_for('record_cigarette') }}" method="post">
+      {{ render_field(form.date) }}
+      {{ render_field(form.time) }}
+   <br/>
+   <button type="submit" class="btn btn-primary">Record</button>
+   </form>
+</div>
+<script> 
+   var date = new Date();
+   var currentDate = date.getFullYear() + '-' + ((date.getMonth() + 1) <10?'0':'') + ( date.getMonth() + 1 )  + '-' + (date.getDate()<10?'0':'') + date.getDate();
+   var currentTime = (date.getHours()<10?'0':'') + date.getHours()+ ":" + (date.getMinutes()<10?'0':'') + date.getMinutes();
+
+   document.getElementById('date').value = currentDate;
+   document.getElementById('time').value = currentTime;
+</script>
+{% endblock %}
