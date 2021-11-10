@@ -2,7 +2,8 @@ from flask import Flask, make_response, jsonify, request, redirect, render_templ
 from datetime import datetime
 from dateutil.parser import parse
 import requests
-from wtforms import Form, BooleanField, StringField, PasswordField, DateField, TimeField, validators
+from wtforms import Form, BooleanField, StringField, PasswordField, validators
+from wtforms.fields.html5 import DateField, TimeField
 
 
 app = Flask(__name__)
