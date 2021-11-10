@@ -24,7 +24,7 @@
                     <a class="nav-link active" aria-current="page" href="{{ url_for('record_cigarette') }}">Record</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{{ url_for('dashboard') }}">Dashboard</a>
+                    <a class="nav-link disabled" aria-current="page" href="{{ url_for('dashboard') }}">Dashboard</a>
                   </li>
                 {% endif %}
               </ul>
@@ -74,10 +74,6 @@
   </div>
   
   <div class="container">
-  {% if current_user %}
-     <h1>Hello {{ current_user.username }}</h1> 
-  {% endif %}
-  
   {% block content %}
   {% endblock %}
   </div>

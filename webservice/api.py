@@ -31,12 +31,12 @@ def token_required(f):
         if auth_header:
             token = auth_header.split(" ")[1]
             if not token:
-                return Response("Token is invalid", 401)
+                return Response(jsonify(message = "Token is invalid - 34"), 401)
         try:
             data = jwt.decode(
                 token, app.config["SECRET_KEY"], algorithms=["HS256"])
         except:
-            return Response("Token is invalid", 401)
+            return Response(jsonify(message = "Token is invalid - 39"), 401)
 
         current_user = data.get("public_id","nothing")
 
@@ -50,7 +50,7 @@ def token_required(f):
                     '''
             result = conn.execute(query, query_parameters).fetchone()
         if not result:
-            return Response("Token is invalid", 401)
+            return Response(jsonify(message = "Token is invalid - 53"), 401)
 
         return f(current_user=current_user, *args, **kwargs)
     return wrapper

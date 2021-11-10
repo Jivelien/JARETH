@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1 class="text-center">Dashboard is not implemented yet.</h1>
+
+{% for cigarette in last_cigarettes %}
+    {{ cigarette.event_time }}
+    <br/>
+{% endfor %}
+
+{% endblock %}
