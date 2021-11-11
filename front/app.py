@@ -124,6 +124,8 @@ def get_logged_in_user_if_exist_with_token(token):
 @app.route("/")
 def main():
     current_user = get_logged_in_user_if_exist(request.cookies)
+    if current_user:
+        return redirect(url_for('dashboard'))
     return render_template("index.html", current_user = current_user)
 
 
@@ -151,7 +153,7 @@ def register():
 def login():
     current_user = get_logged_in_user_if_exist(request.cookies)
     if current_user:
-        return redirect(url_for("main"))
+        return redirect(url_for("dashboard"))
 
     form = LoginForm(request.form)
 
