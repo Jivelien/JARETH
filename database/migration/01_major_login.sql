@@ -20,3 +20,4 @@ CREATE TABLE smoked_cigarettes (
 SELECT public_id FROM users;
 -- MANUAL : replace in following line the public_id
 INSERT INTO smoked_cigarettes (public_user_id, event_time) SELECT '<public_id>', eventtime from event;
+drop table event;
