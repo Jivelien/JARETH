@@ -15,6 +15,25 @@ __SECONDS_PER_DAY__    = 60*60*24
 __SECONDS_PER_HOUR__   = 60*60
 __SECONDS_PER_MINUTE__ = 60
 
+
+import json
+import pandas as pd
+import plotly
+import plotly.express as px
+
+@app.route("/test")
+def test():
+    df = px.data.medals_wide()
+    config = dict({ 'displayModeBar': False , 'responsive': True})
+    fig1 = px.bar(df, x = "nation", y = ['gold', 'silver', 'bronze'])
+
+    html= fig1.to_html(full_html=False, config=config)
+    
+    
+    graphJson = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
+    
+    return render_template("test.html", html = html, graphJSON = graphJson)
+    
 class RegistrationForm(Form):
     username = StringField('Username', [
         validators.Length(min=4, max=25),
@@ -256,9 +275,9 @@ def duration_to_string(duration):
     elif hours > 0:
         result_part.append(f"{hours} hour")
     if minuts > 1:
-        result_part.append(f"{minuts} minuts")
+        result_part.append(f"{minuts} minutes")
     elif minuts > 0:
-        result_part.append(f"{minuts} minut")
+        result_part.append(f"{minuts} minute")
 
     if len(result_part) > 1:
         result_part.insert(-1, "and")

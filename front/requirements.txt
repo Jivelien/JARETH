@@ -6,4 +6,6 @@ WTForms==2.3.3
 flask-wtf==0.15.1
 python-dateutil
 email_validator
-flask_login
+plot
+plotly-express
+pandas
