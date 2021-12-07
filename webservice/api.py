@@ -7,23 +7,25 @@ import datetime
 from time import sleep
 from dateutil.parser import parse
 
-
 app = Flask(__name__)
 app.config.from_object("config.Config")
 
-def is_date(string : str) -> bool:
-    try: 
+
+def is_date(string: str) -> bool:
+    try:
         parse(string)
         return True
     except ValueError:
         return False
 
-def is_integer(string : str) -> bool:
+
+def is_integer(string: str) -> bool:
     try:
         int(string)
         return True
     except ValueError:
         return False
+
 
 def token_required(f):
     def wrapper(*args, **kwargs):
@@ -31,14 +33,14 @@ def token_required(f):
         if auth_header:
             token = auth_header.split(" ")[1]
             if not token:
-                return Response(jsonify(message = "Token is invalid - 34"), 401)
+                return Response(jsonify(message="Token is invalid - 34"), 401)
         try:
             data = jwt.decode(
                 token, app.config["SECRET_KEY"], algorithms=["HS256"])
         except:
-            return Response(jsonify(message = "Token is invalid - 39"), 401)
+            return Response(jsonify(message="Token is invalid - 39"), 401)
 
-        current_user = data.get("public_id","nothing")
+        current_user = data.get("public_id", "nothing")
 
         engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
         with engine.connect() as conn:
@@ -50,10 +52,12 @@ def token_required(f):
                     '''
             result = conn.execute(query, query_parameters).fetchone()
         if not result:
-            return Response(jsonify(message = "Token is invalid - 53"), 401)
+            return Response(jsonify(message="Token is invalid - 53"), 401)
 
         return f(current_user=current_user, *args, **kwargs)
+
     return wrapper
+
 
 @app.route("/whoami", methods=["GET"], endpoint="whoami")
 @token_required
@@ -78,6 +82,7 @@ def whoami(current_user):
         return jsonify(user)
     else:
         return make_response(jsonify(message='Unable to find user'), 404)
+
 
 @app.route("/users", methods=['GET'], endpoint='get_all_users')
 @token_required
@@ -131,9 +136,9 @@ def create_user():
         conn.execute(query, query_parameters)
 
     return make_response(jsonify(public_id=data['public_id'],
-                                     username=data['username'],
-                                     mail=data['mail'],
-                                     password=hashed_password), 201)
+                                 username=data['username'],
+                                 mail=data['mail'],
+                                 password=hashed_password), 201)
 
 
 @app.route("/user/<public_id>", methods=['GET'], endpoint='get_user')
@@ -180,7 +185,7 @@ def update_user(current_user, public_id):
 
     if not result:
         return make_response(jsonify(message="Missing informations in payload"), 400)
-    
+
     data = request.get_json()
     if not data or not data.get('username') or not data.get('mail') or not data.get('password'):
         return make_response(jsonify(message="No user to update"), 404)
@@ -196,9 +201,9 @@ def update_user(current_user, public_id):
         conn.execute(query, query_parameters)
 
     return jsonify(username=data['username'],
-                    public_id=public_id,
-                    mail=data['mail'],
-                    password=hashed_password)
+                   public_id=public_id,
+                   mail=data['mail'],
+                   password=hashed_password)
 
 
 @app.route("/user/<public_id>", methods=['DELETE'], endpoint='delete_user')
@@ -222,7 +227,7 @@ def delete_user(current_user, public_id):
 
     with engine.begin() as conn:
         query_parameters = (public_id,)
-        query= '''
+        query = '''
                DELETE FROM users
                WHERE public_id=%s
                '''
@@ -240,7 +245,7 @@ def login():
 
     with engine.connect() as conn:
         query_parameters = (data['mail'],)
-        query  = '''
+        query = '''
                 SELECT username, public_id, mail, password FROM users WHERE mail=%s
                 '''
         result = conn.execute(query, query_parameters).fetchone()
@@ -311,12 +316,12 @@ def get_cigarettes(current_user):
                 '''
 
         if request.args.get('start_time') and is_date(request.args.get('start_time')):
-            start_time = parse(data.get('start_time'))
+            start_time = parse(request.args.get('start_time'))
             query_parameters.append(start_time)
             query += ' AND event_time >= %s'
 
         if request.args.get('end_time') and is_date(request.args.get('end_time')):
-            end_time = parse(data.get('end_time'))
+            end_time = parse(request.args.get('end_time'))
             query_parameters.append(end_time)
             query += ' AND event_time <= %s'
 
@@ -325,7 +330,7 @@ def get_cigarettes(current_user):
         if request.args.get('limit') and is_integer(request.args.get('limit')):
             query_parameters.append(request.args.get('limit'))
             query += ' LIMIT %s'
-            
+
         results = conn.execute(query, tuple(query_parameters))
 
     cigarettes = []
