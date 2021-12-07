@@ -1,34 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1> Test page </h1>
-<div class="row p-4">
-   <div class="chart" id="chart1"></div>
- </div>
+   {{ html | safe }}
 <h1> test 1</h1>
-{{ html | safe }}
 <h1> Text under</h1>
-
-   <!-- plotly CDN -->
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<script type="text/javascript">
-   var layout = {
-       autosize: true // set autosize to rescale
-};
-
-var config = {
-  'displayModeBar': false
-}
-
-   var graph1 = {{ graphJSON | safe }};
-   Plotly.plot("chart1", graph1, layout, config);
-
-   // update the layout to expand to the available size
-   // when the window is resized
-   window.onresize = function() {
-      Plotly.relayout('chart1', {
-         'xaxis.autorange': true,
-         'yaxis.autorange': true
-      });
-   };
-</script>
 {% endblock %}
